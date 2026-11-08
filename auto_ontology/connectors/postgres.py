@@ -283,8 +283,8 @@ class PostgresDatabase(SQLDatabase):
               ON tc.constraint_name = kcu.constraint_name
              AND tc.table_schema    = kcu.table_schema
             JOIN information_schema.constraint_column_usage ccu
-              ON tc.constraint_name = ccu.constraint_name
-             AND tc.table_schema    = ccu.table_schema
+              ON tc.constraint_name   = ccu.constraint_name
+             AND tc.constraint_schema = ccu.constraint_schema  -- local: PR #414 (스키마 넘는 FK 누락 수정)
             WHERE tc.constraint_type = 'FOREIGN KEY'
               AND tc.table_schema NOT IN ('pg_catalog', 'information_schema')
             ORDER BY kcu.table_schema, kcu.table_name, kcu.column_name

@@ -225,7 +225,12 @@ def _build_client(
     ``ChatOpenAI``, which supports structured output. Everything else uses
     ``ChatNVIDIA``.
     """
-    if model.startswith(("openai/", "azure/", "aws/")):
+    # local: AO_LOCAL_OPENAI_COMPAT=1 → Anthropic OpenAI 호환 엔드포인트 등 접두사 없는 모델도 ChatOpenAI 사용
+    if model.startswith(("openai/", "azure/", "aws/")) or (
+        os.environ.get("AO_LOCAL_OPENAI_COMPAT") == "1"
+        and base_url
+        and "nvidia.com" not in base_url
+    ):
         from langchain_openai import ChatOpenAI
 
         return ChatOpenAI(
@@ -249,6 +254,12 @@ def _build_client(
         base_url=base_url,
         temperature=temperature,
         max_tokens=max_tokens,
+        # local: nemotron thinking 폭주(8192 토큰·60초 초과) → guided_json 400 폴백 회피
+        model_kwargs=(
+            {"chat_template_kwargs": {"enable_thinking": False}}
+            if os.environ.get("AO_LOCAL_DISABLE_THINKING") == "1"
+            else {}
+        ),
     )
     client._client.get_session_fn = lambda: _TimeoutSession(LLM_INVOKE_TIMEOUT_S)
     return client
