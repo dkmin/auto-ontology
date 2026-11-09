@@ -1,0 +1,17 @@
+# 로컬 전용 (커밋하지 않음): 3000은 paca-dev-gateway가 사용 중 → 웹은 3100. 모든 포트를 127.0.0.1에만 엶
+services:
+  postgres:
+    ports: !override
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+  pgadmin:
+    ports: !override
+      - "127.0.0.1:5050:80"
+  auto-ontology:
+    ports: !override
+      - "127.0.0.1:3001:3001"
+  ingestion-service:
+    ports: !override
+      - "127.0.0.1:3002:3002"
+  auto-ontology-frontend:
+    ports: !override
+      - "127.0.0.1:3100:3000"
